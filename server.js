@@ -38,7 +38,7 @@ try {
     res.json(rows) 
 } catch (error) {
     console.error(error)
-    res.statusCode(500).json({ message: "Server error"})
+    res.status(500).json({ message: "Server error"})
 }
 })
 
@@ -53,7 +53,7 @@ app.get("/posts/:id", async (req, res) => {
          res.json(rows)
      } catch (error) {
          console.error(error)
-         res.statusCode(500).json({ message: "Server error"})
+         res.status(500).json({ message: "Server error"})
      }
 })
 
@@ -73,23 +73,39 @@ app.post("/posts", async (req, res) => {
      }
 })
 
-app.put("/posts/:id", (req, res) => {
+app.put("/posts/:id", async (req, res) => {
     const { id } = req.params
-    const body = req.body
+    const { title } = req.body
 
-    const postInd = posts.findIndex((rec) => rec.id === parseInt(id))
+    try {
+        const { rows, rowCount } = await query(`UPDATE posts SET title = COALESCE($1, title) WHERE id = $2 RETURNING *; `, [title, id])
 
-    posts.splice(postInd, 1, { ...body, id })
+        // console.log({ rows, rowCount })
+        if (rowCount === 0) {
+            return res.status(404).json({ message: "Post not found"})
+        }
 
-    res.json({ message: "PUT /posts", data: { ...body, id: +id } })
+        res.status(200).json({ message: 'Post successfully updated.', data: rows[0] })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Server error"})
+    }
+
 })
 
-app.delete("/posts/:id", (req, res) => {
+app.delete("/posts/:id", async (req, res) => {
     const { id } = req.params
-    // const id = req.params.id
-    const postInd = posts.findIndex((rec) => rec.id === parseInt(id))
-    posts.splice(postInd, 1)
-    res.json({ message: "DELETE /posts" })
+    try {
+        const { rows, rowCount } = await query("DELETE FROM posts WHERE id = $1 RETURNING *;", [id])
+         if (rowCount === 0) {
+             return res.status(404).json({ message: "Post not found"})
+         }
+
+         res.json({message: "Post deleted", data: rows[0]})
+     } catch (error) {
+         console.error(error)
+         res.status(500).json({ message: "Server error"})
+     }
 })
 
 
