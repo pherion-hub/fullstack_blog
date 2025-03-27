@@ -1,6 +1,6 @@
 import express from "express"
 import { query } from "./db/index.js"
-
+import cors from "cors"
 
 const posts = [
     { id: 1, title: 'Das ist der erste Post'},
@@ -12,22 +12,24 @@ const posts = [
 const app = express()
 const port = 7755
 
+app.use(cors())
+
 app.use(express.json())
 
-app.get('/', async (req, res) => {
-    const { rows } = await query("SELECT NOW();")
+// app.get('/', async (req, res) => {
+//     const { rows } = await query("SELECT NOW();")
 
-    // console.log(rows)
+//     // console.log(rows)
 
-    const data = {
-        message: "Hello from Express!"
-    }
-    res.json(rows)
-})
+//     const data = {
+//         message: "Hello from Express!"
+//     }
+//     res.json(rows)
+// })
 
-app.post('/', (req, res) => {
-    res.status(201).json({ message: 'Posting to Express'})
-})
+// app.post('/', (req, res) => {
+//     res.status(201).json({ message: 'Posting to Express'})
+// })
 
 
 app.get("/posts", async(req, res) => {
@@ -56,18 +58,18 @@ app.get("/posts/:id", async (req, res) => {
 })
 
 app.post("/posts", async (req, res) => {
-    const { title } = req.body
+    const { title, author, content, cover, date } = req.body
 
     if (!title) return res.status(400).json({ message: "Title is required"})
 
     try {
-        const { rows, rowCount } = await query("INSERT INTO posts (title) values ($1) RETURNING *;", [title])
+        const { rows, rowCount } = await query("INSERT INTO posts (title, author, content, cover, date) values ($1, $2, $3, $4, $5) RETURNING *;", [title, author, content, cover, date])
 
         console.log({ rows, rowCount })
         res.status(201).json({ message: "Post created", data: rows[0] })
      } catch (error) {
          console.error(error)
-         res.statusCode(500).json({ message: "Server error"})
+         res.status(500).json({ message: "Server error"})
      }
 })
 
