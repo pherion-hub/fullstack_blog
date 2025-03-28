@@ -33,6 +33,7 @@ try {
 } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Server error"})
+    res.status(500).json({ message: "Server error"})
 }
 })
 
@@ -47,6 +48,7 @@ app.get("/posts/:id", async (req, res) => {
          res.json(rows)
      } catch (error) {
          console.error(error)
+         res.status(500).json({ message: "Server error"})
          res.status(500).json({ message: "Server error"})
      }
 })
