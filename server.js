@@ -33,7 +33,6 @@ try {
 } catch (error) {
     console.error(error)
     res.status(500).json({ message: "Server error"})
-    res.status(500).json({ message: "Server error"})
 }
 })
 
@@ -48,7 +47,6 @@ app.get("/posts/:id", async (req, res) => {
          res.json(rows)
      } catch (error) {
          console.error(error)
-         res.status(500).json({ message: "Server error"})
          res.status(500).json({ message: "Server error"})
      }
 })
@@ -73,7 +71,6 @@ app.put("/posts/:id", async (req, res) => {
     const { id } = req.params;
   const { title, content, cover} = req.body;
   
-
   try {
     
     const { rows, rowCount } = await query(
